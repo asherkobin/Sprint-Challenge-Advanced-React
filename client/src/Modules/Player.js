@@ -1,43 +1,29 @@
 import React from "react";
-import { useSelectedPlayers } from "../Hooks/useSelectedPlayers";
 
-const Player = ({playerInfo}) =>  {
-  const [selectedPlayers, setSelectedPlayers] = useSelectedPlayers([]);
-  const playerId = "player_" + playerInfo.id;
+const Player = ({playerInfo, isPlayerSelected, onClick, searchPopularity}) =>  {
+  
   const playerStyle = {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
     border: "1px solid green",
-    padding: "5px",
     margin: "5px",
-    width: "200px",
-    textAlign: "center",
-    cursor: "pointer"
+    width: "300px",
+    height: "100px",
+    cursor: "pointer",
+    backgroundColor: isPlayerSelected() ? 
+      (searchPopularity === "HIGH" ? "#86af49" : 
+        searchPopularity === "MEDIUM" ? "#b5e7a0" :
+         "#e3eaa7") : "white"
   };
 
-  function getPlayerStyle() {
-    if (selectedPlayers.includes(playerId)) {
-      playerStyle.backgroundColor = "green";
-    }
-
-    return playerStyle;
-  }
-
   const handleClick = e => {
-
-    if (selectedPlayers.includes(playerId)) {
-      setSelectedPlayers([]);
-      document.getElementById(playerId).style.backgroundColor = "white";
-      console.log(document.getElementById(playerId))
-    }
-    else {
-
-      setSelectedPlayers([playerId]);
-      document.getElementById(playerId).style.backgroundColor = "green";
-      console.log(document.getElementById(playerId))
-    }
+    onClick();
   }
   
   return (
-    <div style={getPlayerStyle()} onClick={handleClick} id={playerId}>
+    <div style={playerStyle} onClick={handleClick}>
       <div>{playerInfo.name}</div>
       <div>{playerInfo.country}</div>
     </div>

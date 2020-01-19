@@ -1,42 +1,47 @@
 import React from "react";
 import Player from "./Player";
-import Axios from "axios";
+import { useRemoteData } from "../Hooks/useRemoteData";
+import { useLocalStorage } from "../Hooks/useLocalStorage";
 
-export default class Players extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      playerData: null
-    };
+const Players = () => {
+  const playerData = useRemoteData("http://localhost:5000/api/players");
+  const [selectedPlayers, setSelectedPlayers] = useLocalStorage("SELECTED_PLAYERS", []);
+  const playersStyle = {
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "center"
+  };
 
-    this.playersStyle = {
-      display: "flex",
-      flexWrap: "wrap"
-    };
+  function toggleSelectedPlayer(playerId) {
+    const filteredSelectedPlayers = selectedPlayers.filter(selectedPlayer => selectedPlayer !== playerId);
+
+    if (selectedPlayers.length === filteredSelectedPlayers.length) {
+      setSelectedPlayers([...filteredSelectedPlayers, playerId]);
+    }
+    else {
+      setSelectedPlayers(filteredSelectedPlayers);
+    }
   }
 
-  componentDidMount() {
-    Axios
-      .get("http://localhost:5000/api/players")
-      .then(res => {
-        this.setState({ playerData: res.data });
-      })
-      .catch(err => {
-        console.log("Axios Error:", err)
-      });
-    };
-
-
-  render() {
-    return (
-      !this.state.playerData ? <div>Loading...</div> :
-      <div style={ this.playersStyle }>
-        {
-          this.state.playerData.map(playerInfo => {
-            return <Player playerInfo={playerInfo} key={ playerInfo.name + playerInfo.country }/>
-          })
-        }
-      </div>
-    )
+  function isPlayerSlected(playerId) {
+    return selectedPlayers.includes(playerId);
   }
+  
+  return (
+    !playerData ? <div>Loading...</div> :
+    <div style={ playersStyle }>
+      { 
+        playerData.map(playerInfo => {
+          const playerId = "player_" + playerInfo.id;
+          return <Player 
+            playerInfo={playerInfo} key={playerId}
+            isPlayerSelected={() => isPlayerSlected(playerId)}
+            onClick={() => toggleSelectedPlayer(playerId)}
+            searchPopularity={ playerInfo.searches > 50 ? "HIGH" : playerInfo.searches >= 5 ? "MEDIUM" : "LOW"} />
+        })
+      }
+    </div>
+  )
 }
+
+export default Players;
